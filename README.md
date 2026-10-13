@@ -4,6 +4,35 @@ A dependency-free VS Code extension for attaching the built-in JavaScript debugg
 to Chrome's approval-based remote debugging server, using your existing browser
 profile, tabs, and logins.
 
+## Why normal Chrome attach does not work here
+
+VS Code's normal `"type": "chrome"` attach configuration expects the traditional
+server started with `--remote-debugging-port`. It requests `/json/version` over
+HTTP to discover the browser's debugging WebSocket address.
+
+The newer **Allow remote debugging for this browser instance** checkbox at
+`chrome://inspect/#remote-debugging` exposes a different, approval-based server.
+Its port accepts connections, but `/json/version` returns **404**: clients must
+read the WebSocket address from the browser's `DevToolsActivePort` file instead.
+Putting that port into a normal Chrome attach configuration therefore fails
+discovery even though the browser is listening. This is not, by itself, a
+firewall or connectivity problem.
+
+There is a second mismatch: VS Code's debugger retries WebSocket handshakes after
+two seconds, while Chrome waits for you to approve the connection. A direct
+pass-through proxy can consequently trigger repeated approval prompts before
+you have time to click **Allow**.
+
+This extension bridges both differences: it obtains approval first, supplies the
+HTTP discovery endpoint, and forwards the debugger's connection. You keep your
+existing browser session rather than launching a separate debugging profile.
+The traditional debugging-port workflow still works without this extension.
+
+See the [matching Chrome DevTools MCP report and maintainer explanation](https://github.com/ChromeDevTools/chrome-devtools-mcp/issues/3077)
+and [VS Code's standard browser attachment instructions](https://code.visualstudio.com/docs/nodejs/browser-debugging#_attaching-to-browsers).
+These limitations describe the debugger implementation checked for this release;
+future VS Code versions may support the approval-based flow directly.
+
 ## Install
 
 Download the `.vsix` from [Releases](https://github.com/nimatrueway/chrome-remote-bridge/releases).
