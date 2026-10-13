@@ -1,0 +1,74 @@
+{
+  "name": "chrome-remote-bridge",
+  "displayName": "Chrome Remote Bridge",
+  "description": "Attach VS Code's JavaScript debugger to Chrome's approval-based remote debugging server.",
+  "version": "0.0.3",
+  "publisher": "local-tools",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nimatrueway/chrome-remote-bridge.git"
+  },
+  "bugs": { "url": "https://github.com/nimatrueway/chrome-remote-bridge/issues" },
+  "homepage": "https://github.com/nimatrueway/chrome-remote-bridge#readme",
+  "engines": { "vscode": "^1.90.0" },
+  "categories": ["Debuggers"],
+  "main": "./extension.cjs",
+  "extensionKind": ["ui"],
+  "extensionDependencies": ["ms-vscode.js-debug"],
+  "activationEvents": ["onDebugResolve:chrome-remote-bridge"],
+  "scripts": { "test": "node --test test.mjs" },
+  "contributes": {
+    "debuggers": [
+      {
+        "type": "chrome-remote-bridge",
+        "label": "Chrome Remote Bridge",
+        "configurationAttributes": {
+          "attach": {
+            "required": ["port"],
+            "properties": {
+              "address": {
+                "type": "string",
+                "default": "127.0.0.1",
+                "description": "Local browser address (127.0.0.1 or localhost)."
+              },
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535,
+                "description": "Server port shown at chrome://inspect/#remote-debugging."
+              },
+              "webRoot": { "type": "string", "default": "${workspaceFolder}" },
+              "sourceMaps": {
+                "type": "boolean",
+                "default": true,
+                "description": "Use JavaScript source maps when available."
+              },
+              "sourceMapPathOverrides": {
+                "type": "object",
+                "additionalProperties": { "type": "string" },
+                "description": "Map source paths from source maps to local files. Supports * wildcards."
+              },
+              "urlFilter": { "type": "string", "description": "Optional page URL filter; supports * wildcards." },
+              "targetSelection": { "enum": ["automatic", "pick"], "default": "pick" },
+              "devToolsActivePort": {
+                "type": "string",
+                "description": "Optional absolute path to the browser's DevToolsActivePort file."
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "name": "Attach to Chrome",
+            "type": "chrome-remote-bridge",
+            "request": "attach",
+            "address": "127.0.0.1",
+            "port": 62883,
+            "webRoot": "${workspaceFolder}"
+          }
+        ]
+      }
+    ]
+  }
+}
